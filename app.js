@@ -2,6 +2,13 @@ const express = require('express');
 const parser = require('body-parser');
 const mongoose = require('mongoose');
 
+// Validation
+
+// at least one uppercase letter, one lowercase letter, one number and one special character
+const passwordValidationRegex = /^(?=.[A-Za-z])(?=.\d)(?=.[@$!%#?&])[A-Za-z\d@$!%*#?&]$/;
+
+// Mongoose stuff
+
 mongoose.connect('mongodb+srv://admin-rohan:test123@cluster0.g0nhe.mongodb.net/StudentData');
 
 // Schemas
@@ -111,9 +118,7 @@ const studentSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-        // match: /^(?=.[A-Za-z])(?=.\d)(?=.[@$!%#?&])[A-Za-z\d@$!%*#?&]$/,
-        // "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]$" 
-        // at least one uppercase letter, one lowercase letter, one number and one special character //
+        // match: passwordValidationRegex,
         minlength: 8,
         maxlength: 16
     },
@@ -136,8 +141,25 @@ const studentSchema = new mongoose.Schema({
 const Student = mongoose.model('Student', studentSchema);
 const CollegeDetail = mongoose.model('CollegeDetail', collegeDataSchema);
 
-function saveToDb(student)
-{
+// Utility Functions
+
+// When the colleges input the student data, that data is converted into an object and returned in a size 1 array. This object is not validated, but its format is fixed.
+function convertFormDataToObject(formData) {
+
+}
+
+// When the colleges input the student data as CSV, that data is converted into an array of objects and sent. The array objects are converted into individual student objects and returned as an array. These objects are not validated, but their format is fixed.
+function convertFormDataToObject(formData) {
+
+}
+
+// Inputs an array of student objects and validates each of them individually.
+function validateStudentData(studentArray) {
+
+}
+
+// Inserts the given data into the database. Assumes the student object is fully valid and complete.
+function saveToDb(student) {
     const collegeDetails = new CollegeDetail({
         rollNo: student.rollNo,
         degreeType: student.degreeType,
@@ -172,17 +194,6 @@ app.use("*/js", express.static("public/js"));
 // Create responses to get, post etc here.
 
 app.get('/', (req, res) => {
-    saveToDb({
-        password: "OTP1234!!!!q",
-        aadharNo: "123123123123",
-        email: 'adfg',
-        rollNo: 'aasd',
-        degreeType: 'asdf',
-        collegeAICTEId: 'asdf',
-        degreeSpecialization: 'asffg',
-        startTime: Date.now(),
-        endTime: Date.now(),
-    });
     res.send('//');
 });
 
