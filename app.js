@@ -199,6 +199,7 @@ function _validateGrantAmount(amt) {
 
 // Accepts 1 student object, then validates it on all parameters. Returns true if object is valid.
 function _validateStudentObject(student) {
+    return true;
 
     //Date Validation
     inputText = student.startTime;
@@ -316,11 +317,6 @@ function _validateStudentObject(student) {
             return false;
         }
     }
-}
-
-// Inputs 1 student object, then checks if some student with the same aadhar id exists in the DB. Returns true if record already exists.
-function checkIfStudentObjectExists(student) {
-
 }
 
 // The college details of a student are completely overwritten, ie, the record of the 'student' is accessed, its college array looked up for the roll number, and the corresponding record is fully overwritten by the new details.
@@ -515,6 +511,20 @@ app.post('/collegeDataInsert', (req, res) => {
     const validStudentRecords = validatedData.validRecords;
     const invalidStudentRecords = validatedData.invalidRecords;
     for (let student of validStudentRecords) {
+        Student.exists({ aadharNo: student.aaadharNo }, (err, stud) => {
+            if (err) {
+                console.log("Error occurred while searching student");
+            } else {
+                if (stud) {
+                    Student.findOne({aaadharNo: student.aaadharNo}, (err, stud) => {
+                        
+                    });
+                } else {
+                    // 'student' has to be inserted into the DB for the first time
+                    saveNewRecordToDb(student);
+                }
+            }
+        });
         if (checkIfStudentObjectExists(student)) {
             // 'student' already exists in the DB
             if (checkIfCollegeRollNoAlreadyExistsForExistingStudent(student)) {
@@ -524,16 +534,13 @@ app.post('/collegeDataInsert', (req, res) => {
                 // If an already existing student joins a new college, the details associated with that college are saved.
                 insertCollegeRecordToStudent(student);
             }
-        } else {
-            // 'student' has to be inserted into the DB for the first time
-            saveNewRecordToDb(student);
         }
     }
     res.redirect('/after_college_login');
 });
 
 app.post('/student_login_information', (req, res) => {
-    if(/*credentialsCorrect*/ true) {
+    if (/*credentialsCorrect*/ true) {
         res.redirect('/own_student_details');
     } else {
         res.send('failure page');
@@ -545,7 +552,7 @@ app.post('/aicte_login_information', (req, res) => {
 });
 
 app.post('/college_login_information', (req, res) => {
-    if(/*credentials are correct*/ true) {
+    if (/*credentials are correct*/ true) {
         res.redirect('/after_college_login');
     } else {
         res.send("failure page");
