@@ -1,6 +1,8 @@
 const express = require('express');
 const parser = require('body-parser');
 const mongoose = require('mongoose');
+const otpGenerator = require('otp-generator');
+const request = require('request');
 
 // Validation
 
@@ -94,7 +96,8 @@ const collegeDataSchema = new mongoose.Schema({
         required: true,
     },
     collegeAICTEId: {
-        type: String, required: true
+        type: String, 
+        required: true,
     },
     degreeSpecialization: {
         type: String,
@@ -107,10 +110,12 @@ const collegeDataSchema = new mongoose.Schema({
     // result: studentResultSchema,   // This is updatable, unlike we thought previously. We may send a reminder to students periodically.
     // currentStatus: studentStatusSchema,    // This is updatable, unlike we thought previously. We may send a reminder to students periodically.
     startTime: {
-        type: Date, required: true
+        type: Date, 
+        required: true,
     },
     endTime: {
-        type: Date, required: true
+        type: Date, 
+        required: true,
     },
 });
 
@@ -188,15 +193,32 @@ function checkIfCollegeRollNoAlreadyExistsForExistingStudent(student) {
 
 }
 
-// Accepts 1 fully valid student record, whose old student record already exists in the DB. The function inserts into the DB 
+// Accepts 1 fully valid student record, whose old student record already exists in the DB. The function inserts into the DB document for the existing student, the new college details. 
 function insertCollegeRecordToStudent(student) {
-
+    Student.findOne({ aadharNo: student.aadharNo }, (err, stud) => {
+        if (err) {
+            // TODO: Decide what to do if error occurrs
+            console.log("Some error occurred while inserting new college:", err);
+        } else {
+            const collegeDetails = new CollegeDetail({
+                rollNo: student.rollNo,
+                degreeType: student.degreeType,
+                collegeAICTEId: student.collegeAICTEId,
+                degreeSpecialization: student.degreeSpecialization,
+                successfulCompletion: false,
+                startTime: student.startTime,
+                endTime: student.endTime
+            });
+            stud.colleges.push(collegeDetails);
+            stud.save();
+        }
+    });
 }
 
 // Inserts the given student object into the database (as a new record, i.e., for the first time). Assumes the student object is fully valid and complete.
 function saveNewRecordToDb(student) {
-    const studentAadharId = student.aadharNo;
-    const newPassword = sendNewPasswordTo(studentAadharId);
+    const studentaadharNo = student.aadharNo;
+    const newPassword = sendNewPasswordTo(studentaadharNo);
     student.password = newPassword;
     const collegeDetails = new CollegeDetail({
         rollNo: student.rollNo,
@@ -224,9 +246,64 @@ function saveNewRecordToDb(student) {
 
 // Student communication functions
 
-// Generates a new password, sends an SMS to the phone number associated with the passed aadharId of the student. It also returns the generated password.
-function sendNewPasswordTo(aadharId) {
+// Generates a new password, sends an SMS to the phone number associated with the passed aadharNo of the student. It also returns the generated password.
+function sendNewPasswordTo(aadharNo) {
 
+    const OTP = otpGenerator.generate(6,{specialChars:false});
+
+    
+
+    request.post('http://my_textbelt_server/text',
+    { 
+        json: { number: "+918700694558",
+                message: OTP
+            } 
+        },
+        function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log(body);
+        }
+        }
+    );
+    return OTP;
+    /*var twilio = require('twilio');
+
+    // Find your account sid and auth token in your Twilio account Console.
+    var client = new twilio('ACe1d68fb4daec3c53b8b461d9e6bcdd5d', 'a6b5d4a9d201291bae9a8030db3b2088');
+    
+    // Send the text message.
+    client.messages.create({
+      to: '+918130108514',
+      from: '+13186687492',
+      body: OTP
+    });*/
+    /* Basic Auth */
+    /*lib.Configuration.basicAuthUserName = "YOUR_BASIC_API_KEY";
+    lib.Configuration.basicAuthPassword = "YOUR_BASIC_SECRET_KEY";*/
+
+    /* HMAC
+        lib.Configuration.hmacAuthUserName = "YOUR_HMAC_API_KEY";
+        lib.Configuration.hmacAuthPassword = "YOUR_HMAC_SECRET_KEY";
+    */
+
+    /*var controller = lib.MessagesController;
+
+    let body = new lib.SendMessagesRequest();
+
+    body.messages = [];
+
+    body.messages[0] = new lib.Message();
+
+    body.messages[0].content = OTP;
+    body.messages[0].destinationNumber = '+614';
+
+    controller.sendMessages(body, function (error, response, context) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log(response);
+        }
+    });*/
 }
 
 const app = express();
@@ -238,7 +315,21 @@ app.use("*/js", express.static("public/js"));
 
 // Create responses to get, post etc here.
 
+app.get('/otptest', (req, res) => {
+    console.log('OTP is', sendNewPasswordTo('a'));
+    res.send('asdaf');
+});
+
 app.get('/', (req, res) => {
+    insertCollegeRecordToStudent({
+        aadharNo: '123123123123',
+        rollNo: 'a',
+        degreeType: 'a',
+        collegeAICTEId: 'a',
+        degreeSpecialization: 'a',
+        startTime: Date.now(),
+        endTime: Date.now(),
+    });
     res.send('//');
 });
 
@@ -256,10 +347,10 @@ app.post('/collegeDataInsert', (req, res) => {
         if (checkIfStudentObjectExists(student)) {
             // 'student' already exists in the DB
             if (checkIfCollegeRollNoAlreadyExistsForExistingStudent(student)) {
-                // If an already existing student, whose details already existed 
+                // If for an already existing student, whose details already existed, its present college wants to update the details.
             } else {
                 // If an already existing student joins a new college, the details associated with that college are saved.
-                saveNewCollegeDetailRecordToStudent(student);
+                insertCollegeRecordToStudent(student);
             }
         } else {
             // 'student' has to be inserted into the DB for the first time
