@@ -143,6 +143,8 @@ const CollegeDetail = mongoose.model('CollegeDetail', collegeDataSchema);
 
 // Utility Functions
 
+// College data input sequence functions
+
 // When the colleges input the student data, that data is converted into an object and returned in a size 1 array. This object is not validated, but its format is fixed.
 function convertFormDataToObject(formData) {
 
@@ -155,11 +157,28 @@ function convertFormDataToObject(formData) {
 
 // Inputs an array of student objects and validates each of them individually.
 function validateStudentData(studentArray) {
+    for(let student of studentArray) {
+        // validate the record 'student'
+    }
+}
+
+// Accepts 1 student object, then validates it on all parameters. Returns true if object is valid.
+function validateStudentObject(student) {
 
 }
 
-// Inserts the given data into the database. Assumes the student object is fully valid and complete.
-function saveToDb(student) {
+// Inputs 1 student object, then checks if some student with the same aadhar id exists in the DB. Returns true if record already exists.
+function checkIfStudentObjectExists(student) {
+
+}
+
+// Accepts 1 fully valid student record, whose old student record already exists in the DB. The function inserts into the DB 
+function insertCollegeRecordToStudent(student) {
+
+}
+
+// Inserts the given student object into the database (as a new record). Assumes the student object is fully valid and complete.
+function saveNewRecordToDb(student) {
     const collegeDetails = new CollegeDetail({
         rollNo: student.rollNo,
         degreeType: student.degreeType,

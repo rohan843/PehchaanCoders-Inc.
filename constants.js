@@ -6,9 +6,9 @@ const actions = {
   };
   
   const roles = {
-    ADMIN: "ADMIN",
-    EDITOR: "EDITOR",
-    GUEST: "GUEST"
+    Student: "Student",
+    College: "College",
+    AICTE: "AICTE"
   };
   
   export { actions, roles };
