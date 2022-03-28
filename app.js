@@ -2,6 +2,8 @@ const express = require('express');
 const parser = require('body-parser');
 const mongoose = require('mongoose');
 
+mongoose.connect('mongodb+srv://admin-rohan:<password>@cluster0.g0nhe.mongodb.net/StudentData');
+
 // Create schemas and models here
 
 const app = express();
