@@ -146,29 +146,45 @@ const CollegeDetail = mongoose.model('CollegeDetail', collegeDataSchema);
 // College data input sequence functions
 
 // When the colleges input the student data, that data is converted into an object and returned in a size 1 array. This object is not validated, but its format is fixed.
-function convertFormDataToObject(formData) {
+function convertFormDataToObjectArray(formData) {
 
 }
 
 // When the colleges input the student data as CSV, that data is converted into an array of objects and sent. The array objects are converted into individual student objects and returned as an array. These objects are not validated, but their format is fixed.
-function convertFormDataToObject(formData) {
+function convertCSVDataToObjectArray(formData) {
 
 }
 
-// Inputs an array of student objects and validates each of them individually.
+// Inputs an array of student objects and validates each of them individually. The valid records are converted into an array, the invalid records are converted into another array and the collective is returned as an object.
 function validateStudentData(studentArray) {
-    for(let student of studentArray) {
-        // validate the record 'student'
+    const validRecords = [];
+    const invalidRecords = [];
+    for (let student of studentArray) {
+        const curStudentValid = _validateStudentObject(student);
+        if(curStudentValid) {
+            validRecords.push(student);
+        } else {
+            invalidRecords.push(student);
+        }
     }
+    return {
+        validRecords: validRecords,
+        invalidRecords: invalidRecords
+    };
 }
 
 // Accepts 1 student object, then validates it on all parameters. Returns true if object is valid.
-function validateStudentObject(student) {
+function _validateStudentObject(student) {
 
 }
 
 // Inputs 1 student object, then checks if some student with the same aadhar id exists in the DB. Returns true if record already exists.
 function checkIfStudentObjectExists(student) {
+
+}
+
+// Returns true if for an existing student in the DB, the college roll no. already exists in the colleges array for that student.
+function checkIfCollegeRollNoAlreadyExistsForExistingStudent(student) {
 
 }
 
@@ -203,6 +219,8 @@ function saveNewRecordToDb(student) {
     studentInfo.save();
 }
 
+
+
 const app = express();
 app.set('view engine', 'ejs');
 app.use(parser.urlencoded({ extended: true }));
@@ -214,6 +232,17 @@ app.use("*/js", express.static("public/js"));
 
 app.get('/', (req, res) => {
     res.send('//');
+});
+
+app.post('/collegeDataInsert', (req, res) => {
+    let studentRecordsArray = [];
+    if(req.body.formInput) {
+        studentRecordsArray = convertFormDataToObjectArray(req.body.formData);
+    } else {
+        studentRecordsArray = convertCSVDataToObjectArray(req.body.formData);
+    }
+    const validatedData = validateStudentData(studentRecordsArray);
+
 });
 
 app.listen(3000, () => {
