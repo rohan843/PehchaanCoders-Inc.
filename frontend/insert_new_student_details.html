@@ -29,45 +29,48 @@
                   LOGIN
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
-                  <li><a class="dropdown-item" href="student_login.html">STUDENT LOGIN</a></li>
-                  <li><a class="dropdown-item" href="college_login.html">COLLEGE LOGIN</a></li>
-                  <li><a class="dropdown-item" href="aicte_login.html">AICTE LOGIN</a></li>
+                  <li><a class="dropdown-item" href="/student_login">STUDENT LOGIN</a></li>
+                  <li><a class="dropdown-item" href="/college_login">COLLEGE LOGIN</a></li>
+                  <li><a class="dropdown-item" href="/aicte_login">AICTE LOGIN</a></li>
                 </ul>
               </li>
             </ul>
           </div>
-       
-         
-        </ul>
-       
-      </div>
-    </div>
-  </nav>
+        </div>
+      </nav>
       <h1 style="margin:10px;">Insert New Student Details</h1>
-      <form class="row g-3" style="margin:20px;padding:20px;border:2px solid black;">
+      <form class="row g-3" style="margin:20px;padding:20px;border:2px solid black;" method="post" action="/collegeDataInsert">
+        <div class="col-6">
+          <label for="aadharno" class="form-label">AADHAR NUMBER</label>
+          <input type="text" class="form-control" id="aadharno" name="aadharno">
+        </div>
         <div class="col-6">
           <label for="rollno" class="form-label">ROLL NUMBER</label>
-          <input type="text" class="form-control" id="rollno">
+          <input type="text" class="form-control" id="rollno" name="rollno">
+        </div>
+        <div class="col-6">
+          <label for="email" class="form-label">EMAIL</label>
+          <input type="text" class="form-control" id="email" name="email">
         </div>
         <div class="col-6">
           <label for="degreeType" class="form-label">Degree Type</label>
-          <input type="text" class="form-control" id="degreeType" placeholder="B Tech">
+          <input type="text" class="form-control" id="degreeType" placeholder="B Tech" name="degreeType">
         </div>
         <div class="col-6">
           <label for="collegeAICTEId" class="form-label">College AICTE ID</label>
-          <input type="text" class="form-control" id="collegeAICTEId">
+          <input type="text" class="form-control" id="collegeAICTEId" name="collegeAICTEId">
         </div>
         <div class="col-6">
           <label for="degreeSpecialization" class="form-label">Degree Specialization</label>
-          <input type="text" class="form-control" id="degreeSpecialization" placeholder="Computer Science">
+          <input type="text" class="form-control" id="degreeSpecialization" placeholder="Computer Science" name="degreeSpecialization">
         </div>
         <div class="col-6">
           <label for="startTime" class="form-label">Starting Time</label>
-          <input type="date" class="form-control" id="startTime">
+          <input type="date" class="form-control" id="startTime" name="startTime">
         </div>
         <div class="col-6">
             <label for="endTime" class="form-label">Ending Time</label>
-            <input type="date" class="form-control" id="endTime">
+            <input type="date" class="form-control" id="endTime" name="endTime">
           </div>
        
         <div class="col-12">

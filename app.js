@@ -152,7 +152,16 @@ const CollegeDetail = mongoose.model('CollegeDetail', collegeDataSchema);
 
 // When the colleges input the student data, that data is converted into an object and returned in a size 1 array. This object is not validated, but its format is fixed.
 function convertFormDataToObjectArray(formData) {
-
+    return [{
+        aadharNo: formData.aadharno,
+        rollno: formData.rollno,
+        degreeType: formData.degreeType,
+        degreeSpecialization: formData.degreeSpecialization,
+        collegeAICTEId: formData.collegeAICTEId,
+        email: formData.email,
+        startTime: formData.startTime,
+        endTime: formData.endTime
+    }];
 }
 
 // When the colleges input the student data as CSV, that data is converted into an array of objects and sent. The array objects are converted into individual student objects and returned as an array. These objects are not validated, but their format is fixed.
@@ -178,8 +187,7 @@ function validateStudentData(studentArray) {
     };
 }
 
-function _validateGrantAmount(amt)
-{
+function _validateGrantAmount(amt) {
     //decimal numbers validation
     var str = amt;
     var re = /^[-+]?[0-9]+\.[0-9][0-9]+$/;
@@ -318,11 +326,11 @@ function checkIfStudentObjectExists(student) {
 // The college details of a student are completely overwritten, ie, the record of the 'student' is accessed, its college array looked up for the roll number, and the corresponding record is fully overwritten by the new details.
 function overwriteExistingStudentsCollegeDetails(student) {
     Student.findOne({ aadharNo: student.aadharNo }, (err, stud) => {
-        if(err) {
+        if (err) {
             console.log("Some error occurred while overwriting existing student's college details:", err);
         } else {
             for (let clg of stud.colleges) {
-                if(clg.rollNo == student.rollNo && clg.endTime > Date.now() && !clg.successfulCompletion) {
+                if (clg.rollNo == student.rollNo && clg.endTime > Date.now() && !clg.successfulCompletion) {
                     clg.degreeType = student.degreeType;
                     clg.degreeSpecialization = student.degreeSpecialization;
                     clg.collegeAICTEId = student.collegeAICTEId;
@@ -462,12 +470,38 @@ app.set('view engine', 'ejs');
 app.use(parser.urlencoded({ extended: true }));
 app.use("*/css", express.static("public/css"));
 app.use("*/img", express.static("public/img"));
+app.use("*/videos", express.static("public/videos"));
 app.use("*/js", express.static("public/js"));
 
 // Create responses to get, post etc here.
 
 app.get('/', (req, res) => {
-    
+    res.sendFile(__dirname + '/frontend/index.html');
+});
+
+app.get('/student_login', (req, res) => {
+    res.sendFile(__dirname + '/frontend/student_login.html');
+});
+app.get('/college_login', (req, res) => {
+    res.sendFile(__dirname + '/frontend/college_login.html');
+});
+app.get('/aicte_login', (req, res) => {
+    res.sendFile(__dirname + '/frontend/aicte_login.html');
+});
+app.get('/own_student_details', (req, res) => {
+    res.sendFile(__dirname + '/frontend/own_student_details_display.html');
+});
+app.get('/insert_new_student_details', (req, res) => {
+    res.sendFile(__dirname + '/frontend/insert_new_student_details.html');
+});
+app.get('/uploading_csv_files', (req, res) => {
+    res.sendFile(__dirname + '/frontend/uploading_csv_files.html');
+});
+app.get('/view_student_details', (req, res) => {
+    res.sendFile(__dirname + '/frontend/view_student_details.html');
+});
+app.get('/after_college_login', (req, res) => {
+    res.sendFile(__dirname + '/frontend/after_college_login.html');
 });
 
 app.post('/collegeDataInsert', (req, res) => {
@@ -494,6 +528,27 @@ app.post('/collegeDataInsert', (req, res) => {
             // 'student' has to be inserted into the DB for the first time
             saveNewRecordToDb(student);
         }
+    }
+    res.redirect('/after_college_login');
+});
+
+app.post('/student_login_information', (req, res) => {
+    if(/*credentialsCorrect*/ true) {
+        res.redirect('/own_student_details');
+    } else {
+        res.send('failure page');
+    }
+});
+
+app.post('/aicte_login_information', (req, res) => {
+    res.send('Next Page if creds correct, else error message');
+});
+
+app.post('/college_login_information', (req, res) => {
+    if(/*credentials are correct*/ true) {
+        res.redirect('/after_college_login');
+    } else {
+        res.send("failure page");
     }
 });
 
