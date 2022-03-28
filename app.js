@@ -242,7 +242,8 @@ app.post('/collegeDataInsert', (req, res) => {
         studentRecordsArray = convertCSVDataToObjectArray(req.body.formData);
     }
     const validatedData = validateStudentData(studentRecordsArray);
-
+    const validStudentRecords = validatedData.validRecords;
+    const invalidStudentRecords = validatedData.invalidRecords;
 });
 
 app.listen(3000, () => {
