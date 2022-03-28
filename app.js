@@ -96,7 +96,7 @@ const collegeDataSchema = new mongoose.Schema({
         required: true,
     },
     collegeAICTEId: {
-        type: String, 
+        type: String,
         required: true,
     },
     degreeSpecialization: {
@@ -110,11 +110,11 @@ const collegeDataSchema = new mongoose.Schema({
     // result: studentResultSchema,   // This is updatable, unlike we thought previously. We may send a reminder to students periodically.
     // currentStatus: studentStatusSchema,    // This is updatable, unlike we thought previously. We may send a reminder to students periodically.
     startTime: {
-        type: Date, 
+        type: Date,
         required: true,
     },
     endTime: {
-        type: Date, 
+        type: Date,
         required: true,
     },
 });
@@ -178,14 +178,163 @@ function validateStudentData(studentArray) {
     };
 }
 
+function _validateGrantAmount(amt)
+{
+    //decimal numbers validation
+    var str = amt;
+    var re = /^[-+]?[0-9]+\.[0-9][0-9]+$/;
+    var found = str.match(re);
+    if (found == str) {
+        document.getElementById("").innerHTML = result;
+    }
+}
+
 // Accepts 1 student object, then validates it on all parameters. Returns true if object is valid.
 function _validateStudentObject(student) {
 
+    //Date Validation
+    inputText = student.startTime;
+    function validatedate(inputText) {
+        var dateformat = /^[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/;
+        // Match the date format through regular expression
+        if (inputText.value.match(dateformat)) {
+            document.form1.text1.focus();
+            //Test which seperator is used '/' or '-'
+            var opera1 = inputText.value.split('/');
+            var opera2 = inputText.value.split('-');
+            lopera1 = opera1.length;
+            lopera2 = opera2.length;
+            // Extract the string into month, date and year
+            if (lopera1 > 1) {
+                var pdate = inputText.value.split('/');
+            }
+            else if (lopera2 > 1) {
+                var pdate = inputText.value.split('-');
+            }
+            var mm = parseInt(pdate[0]);
+            var yy = parseInt(pdate[1]);
+
+            // Create list of days of a month [assume there is no leap year by default]
+            var ListofDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            if (mm == 1 || mm > 2) {
+                if (dd > ListofDays[mm - 1]) {
+                    alert('Invalid date format!');
+                    return false;
+                }
+            }
+            if (mm == 2) {
+                var lyear = false;
+                if ((!(yy % 4) && yy % 100) || !(yy % 400)) {
+                    lyear = true;
+                }
+                if ((lyear == false) && (dd >= 29)) {
+                    alert('Invalid date format!');
+                    return false;
+                }
+                if ((lyear == true) && (dd > 29)) {
+                    alert('Invalid date format!');
+                    return false;
+                }
+            }
+        }
+        else {
+            alert("Invalid date format!");
+            document.form1.text1.focus();
+            return false;
+        }
+    }
+
+    inputText = student.endTime;
+    function validatedate(inputText) {
+        var dateformat = /^[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/;
+        // Match the date format through regular expression
+        if (inputText.value.match(dateformat)) {
+            document.form1.text1.focus();
+            //Test which seperator is used '/' or '-'
+            var opera1 = inputText.value.split('/');
+            var opera2 = inputText.value.split('-');
+            lopera1 = opera1.length;
+            lopera2 = opera2.length;
+            // Extract the string into month, date and year
+            if (lopera1 > 1) {
+                var pdate = inputText.value.split('/');
+            }
+            else if (lopera2 > 1) {
+                var pdate = inputText.value.split('-');
+            }
+            var mm = parseInt(pdate[0]);
+            var yy = parseInt(pdate[1]);
+
+            // Create list of days of a month [assume there is no leap year by default]
+            var ListofDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            if (mm == 1 || mm > 2) {
+                if (dd > ListofDays[mm - 1]) {
+                    alert('Invalid date format!');
+                    return false;
+                }
+            }
+            if (mm == 2) {
+                var lyear = false;
+                if ((!(yy % 4) && yy % 100) || !(yy % 400)) {
+                    lyear = true;
+                }
+                if ((lyear == false) && (dd >= 29)) {
+                    alert('Invalid date format!');
+                    return false;
+                }
+                if ((lyear == true) && (dd > 29)) {
+                    alert('Invalid date format!');
+                    return false;
+                }
+            }
+        }
+        else {
+            alert("Invalid date format!");
+            document.form1.text1.focus();
+            return false;
+        }
+    }
+
+    //Aadhaar Format
+    function validateAadhaar() {
+        var regexp = /^[2-9]{1}[0-9]{3}\s[0-9]{4}\s[0-9]{4}$/;
+        //var ano = document.getElementById("").value;
+        var ano = student.aaadharNo;
+        if (regexp.test(ano)) {
+            console.log("Valid Aadhaar Number");
+            return true;
+        } else {
+            console.log("Invalid Aadhaar Number");
+            return false;
+        }
+    }
 }
 
 // Inputs 1 student object, then checks if some student with the same aadhar id exists in the DB. Returns true if record already exists.
 function checkIfStudentObjectExists(student) {
 
+}
+
+// The college details of a student are completely overwritten, ie, the record of the 'student' is accessed, its college array looked up for the roll number, and the corresponding record is fully overwritten by the new details.
+function overwriteExistingStudentsCollegeDetails(student) {
+    Student.findOne({ aadharNo: student.aadharNo }, (err, stud) => {
+        if(err) {
+            console.log("Some error occurred while overwriting existing student's college details:", err);
+        } else {
+            for (let clg of stud.colleges) {
+                if(clg.rollNo == student.rollNo && clg.endTime > Date.now() && !clg.successfulCompletion) {
+                    clg.degreeType = student.degreeType;
+                    clg.degreeSpecialization = student.degreeSpecialization;
+                    clg.collegeAICTEId = student.collegeAICTEId;
+                    clg.successfulCompletion = student.successfulCompletion;
+                    clg.startTime = student.startTime;
+                    clg.endTime = student.endTime;
+                    break;
+                }
+            }
+            stud.save();
+        }
+    });
 }
 
 // Returns true if for an existing student in the DB, the college roll no. already exists in the colleges array for that student.
@@ -249,20 +398,22 @@ function saveNewRecordToDb(student) {
 // Generates a new password, sends an SMS to the phone number associated with the passed aadharNo of the student. It also returns the generated password.
 function sendNewPasswordTo(aadharNo) {
 
-    const OTP = otpGenerator.generate(6,{specialChars:false});
+    const OTP = otpGenerator.generate(6, { specialChars: false });
 
-    
 
+
+    // TODO: Add SMS method.
     request.post('http://my_textbelt_server/text',
-    { 
-        json: { number: "+918700694558",
+        {
+            json: {
+                number: +918700694558,
                 message: OTP
-            } 
+            }
         },
         function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            console.log(body);
-        }
+            if (!error && response.statusCode == 200) {
+                console.log(body);
+            }
         }
     );
     return OTP;
@@ -315,22 +466,8 @@ app.use("*/js", express.static("public/js"));
 
 // Create responses to get, post etc here.
 
-app.get('/otptest', (req, res) => {
-    console.log('OTP is', sendNewPasswordTo('a'));
-    res.send('asdaf');
-});
-
 app.get('/', (req, res) => {
-    insertCollegeRecordToStudent({
-        aadharNo: '123123123123',
-        rollNo: 'a',
-        degreeType: 'a',
-        collegeAICTEId: 'a',
-        degreeSpecialization: 'a',
-        startTime: Date.now(),
-        endTime: Date.now(),
-    });
-    res.send('//');
+    
 });
 
 app.post('/collegeDataInsert', (req, res) => {
@@ -348,6 +485,7 @@ app.post('/collegeDataInsert', (req, res) => {
             // 'student' already exists in the DB
             if (checkIfCollegeRollNoAlreadyExistsForExistingStudent(student)) {
                 // If for an already existing student, whose details already existed, its present college wants to update the details.
+                overwriteExistingStudentsCollegeDetails();
             } else {
                 // If an already existing student joins a new college, the details associated with that college are saved.
                 insertCollegeRecordToStudent(student);
