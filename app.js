@@ -2,63 +2,9 @@ const express = require('express');
 const parser = require('body-parser');
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb+srv://admin-rohan:<password>@cluster0.g0nhe.mongodb.net/StudentData');
+mongoose.connect('mongodb+srv://admin-rohan:test123@cluster0.g0nhe.mongodb.net/StudentData');
 
 // Schemas
-
-const studentSchema = new mongoose.Schema({
-    password: {
-        type: String,
-        required: true,
-        match: /^(?=.[A-Za-z])(?=.\d)(?=.[@$!%#?&])[A-Za-z\d@$!%*#?&]$/,
-        // "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]$" 
-        // at least one uppercase letter, one lowercase letter, one number and one special character //
-        minlength: 8,
-        maxlength: 16
-    },
-    aadharNo: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-    },
-    colleges: [collegeDataSchema],
-    trainings: [trainingDataSchema],
-    fellowships: [fellowshipDataSchema],
-    grants: [grantDataSchema],
-    fellowshipAndGrant: [fellowshipGrantRelationDataSchema],
-});
-
-const collegeDataSchema = new mongoose.Schema({
-    rollNo: {
-        type: String,
-        required: true,
-    },
-    degreeType: {
-        type: String,
-        required: true,
-    },
-    collegeAICTEId: {
-        type: String, required: true
-    },
-    degreeSpecialization: {
-        type: String,
-        required: true,
-    },
-    successfulCompletion: {
-        type: Boolean,
-        required: true,
-    },
-    result: studentResultSchema,   // This is updatable, unlike we thought previously. We may send a reminder to students periodically.
-    currentStatus: studentStatusSchema,    // This is updatable, unlike we thought previously. We may send a reminder to students periodically.
-    startTime: {
-        type: Date, required: true
-    },
-    endTime: {
-        type: Date, required: true
-    },
-});
 
 const studentResultSchema = new mongoose.Schema({
     // To be decided.
@@ -131,9 +77,90 @@ const fellowshipGrantRelationDataSchema = new mongoose.Schema({
     },
 });
 
+const collegeDataSchema = new mongoose.Schema({
+    rollNo: {
+        type: String,
+        required: true,
+    },
+    degreeType: {
+        type: String,
+        required: true,
+    },
+    collegeAICTEId: {
+        type: String, required: true
+    },
+    degreeSpecialization: {
+        type: String,
+        required: true,
+    },
+    successfulCompletion: {
+        type: Boolean,
+        required: true,
+    },
+    // result: studentResultSchema,   // This is updatable, unlike we thought previously. We may send a reminder to students periodically.
+    // currentStatus: studentStatusSchema,    // This is updatable, unlike we thought previously. We may send a reminder to students periodically.
+    startTime: {
+        type: Date, required: true
+    },
+    endTime: {
+        type: Date, required: true
+    },
+});
+
+const studentSchema = new mongoose.Schema({
+    password: {
+        type: String,
+        required: true,
+        // match: /^(?=.[A-Za-z])(?=.\d)(?=.[@$!%#?&])[A-Za-z\d@$!%*#?&]$/,
+        // "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]$" 
+        // at least one uppercase letter, one lowercase letter, one number and one special character //
+        minlength: 8,
+        maxlength: 16
+    },
+    aadharNo: {
+        type: String,
+        required: true,
+    },
+    email: {
+        type: String,
+    },
+    colleges: [collegeDataSchema],
+    trainings: [trainingDataSchema],
+    fellowships: [fellowshipDataSchema],
+    grants: [grantDataSchema],
+    fellowshipAndGrant: [fellowshipGrantRelationDataSchema],
+});
+
 // Models
 
 const Student = mongoose.model('Student', studentSchema);
+const CollegeDetail = mongoose.model('CollegeDetail', collegeDataSchema);
+
+function saveToDb(student)
+{
+    const collegeDetails = new CollegeDetail({
+        rollNo: student.rollNo,
+        degreeType: student.degreeType,
+        collegeAICTEId: student.collegeAICTEId,
+        degreeSpecialization: student.degreeSpecialization,
+        successfulCompletion: false,
+        startTime: student.startTime,
+        endTime: student.endTime
+    });
+
+    const studentInfo = new Student({
+        password: student.password,
+        aadharNo: student.aadharNo,
+        email: student.email,
+        colleges: [collegeDetails],
+        trainings: [],
+        fellowship: [],
+        grant: [],
+        fellowshipAndGrant: []
+    });
+
+    studentInfo.save();
+}
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -143,6 +170,21 @@ app.use("*/img", express.static("public/img"));
 app.use("*/js", express.static("public/js"));
 
 // Create responses to get, post etc here.
+
+app.get('/', (req, res) => {
+    saveToDb({
+        password: "OTP1234!!!!q",
+        aadharNo: "123123123123",
+        email: 'adfg',
+        rollNo: 'aasd',
+        degreeType: 'asdf',
+        collegeAICTEId: 'asdf',
+        degreeSpecialization: 'asffg',
+        startTime: Date.now(),
+        endTime: Date.now(),
+    });
+    res.send('//');
+});
 
 app.listen(3000, () => {
     console.log("Server set up to listen on port 3000.");
