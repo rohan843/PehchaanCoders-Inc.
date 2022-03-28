@@ -161,7 +161,7 @@ function validateStudentData(studentArray) {
     const invalidRecords = [];
     for (let student of studentArray) {
         const curStudentValid = _validateStudentObject(student);
-        if(curStudentValid) {
+        if (curStudentValid) {
             validRecords.push(student);
         } else {
             invalidRecords.push(student);
@@ -193,8 +193,11 @@ function insertCollegeRecordToStudent(student) {
 
 }
 
-// Inserts the given student object into the database (as a new record). Assumes the student object is fully valid and complete.
+// Inserts the given student object into the database (as a new record, i.e., for the first time). Assumes the student object is fully valid and complete.
 function saveNewRecordToDb(student) {
+    const studentAadharId = student.aadharNo;
+    const newPassword = sendNewPasswordTo(studentAadharId);
+    student.password = newPassword;
     const collegeDetails = new CollegeDetail({
         rollNo: student.rollNo,
         degreeType: student.degreeType,
@@ -219,7 +222,12 @@ function saveNewRecordToDb(student) {
     studentInfo.save();
 }
 
+// Student communication functions
 
+// Generates a new password, sends an SMS to the phone number associated with the passed aadharId of the student. It also returns the generated password.
+function sendNewPasswordTo(aadharId) {
+
+}
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -236,7 +244,7 @@ app.get('/', (req, res) => {
 
 app.post('/collegeDataInsert', (req, res) => {
     let studentRecordsArray = [];
-    if(req.body.formInput) {
+    if (req.body.formInput) {
         studentRecordsArray = convertFormDataToObjectArray(req.body.formData);
     } else {
         studentRecordsArray = convertCSVDataToObjectArray(req.body.formData);
@@ -244,6 +252,20 @@ app.post('/collegeDataInsert', (req, res) => {
     const validatedData = validateStudentData(studentRecordsArray);
     const validStudentRecords = validatedData.validRecords;
     const invalidStudentRecords = validatedData.invalidRecords;
+    for (let student of validStudentRecords) {
+        if (checkIfStudentObjectExists(student)) {
+            // 'student' already exists in the DB
+            if (checkIfCollegeRollNoAlreadyExistsForExistingStudent(student)) {
+                // If an already existing student, whose details already existed 
+            } else {
+                // If an already existing student joins a new college, the details associated with that college are saved.
+                saveNewCollegeDetailRecordToStudent(student);
+            }
+        } else {
+            // 'student' has to be inserted into the DB for the first time
+            saveNewRecordToDb(student);
+        }
+    }
 });
 
 app.listen(3000, () => {
