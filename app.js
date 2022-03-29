@@ -517,7 +517,6 @@ app.post('/collegeDataInsert', (req, res) => {
             } else {
                 if (stud) {
                     Student.findOne({ aaadharNo: student.aaadharNo }, (err, stud) => {
-                        // TODO: Put it here
                         if (err) {
                             console.log(err);
                         } else {
