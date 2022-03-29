@@ -309,7 +309,7 @@ function _validateStudentObject(student) {
     function validateAadhaar() {
         var regexp = /^[2-9]{1}[0-9]{3}\s[0-9]{4}\s[0-9]{4}$/;
         //var ano = document.getElementById("").value;
-        var ano = student.aaadharNo;
+        var ano = student.aadharNo;
         if (regexp.test(ano)) {
             console.log("Valid Aadhaar Number");
             return true;
