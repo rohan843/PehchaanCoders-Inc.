@@ -154,7 +154,7 @@ const CollegeDetail = mongoose.model('CollegeDetail', collegeDataSchema);
 function convertFormDataToObjectArray(formData) {
     return [{
         aadharNo: formData.aadharno,
-        rollno: formData.rollno,
+        rollNo: formData.rollno,
         degreeType: formData.degreeType,
         degreeSpecialization: formData.degreeSpecialization,
         collegeAICTEId: formData.collegeAICTEId,
@@ -402,7 +402,7 @@ function saveNewRecordToDb(student) {
 // Generates a new password, sends an SMS to the phone number associated with the passed aadharNo of the student. It also returns the generated password.
 function sendNewPasswordTo(aadharNo) {
 
-    const OTP = otpGenerator.generate(6, { specialChars: false });
+    const OTP = otpGenerator.generate(8);
 
 
 
@@ -503,9 +503,9 @@ app.get('/after_college_login', (req, res) => {
 app.post('/collegeDataInsert', (req, res) => {
     let studentRecordsArray = [];
     if (req.body.formInput) {
-        studentRecordsArray = convertFormDataToObjectArray(req.body.formData);
+        studentRecordsArray = convertFormDataToObjectArray(req.body);
     } else {
-        studentRecordsArray = convertCSVDataToObjectArray(req.body.formData);
+        studentRecordsArray = convertCSVDataToObjectArray(req.body);
     }
     const validatedData = validateStudentData(studentRecordsArray);
     const validStudentRecords = validatedData.validRecords;
@@ -516,8 +516,25 @@ app.post('/collegeDataInsert', (req, res) => {
                 console.log("Error occurred while searching student");
             } else {
                 if (stud) {
-                    Student.findOne({aaadharNo: student.aaadharNo}, (err, stud) => {
-                        
+                    Student.findOne({ aaadharNo: student.aaadharNo }, (err, stud) => {
+                        // TODO: Put it here
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            let rollNoFound = false;
+                            for (let clg of stud.colleges) {
+                                if (clg.rollNo == student.rollNo) {
+                                    rollNoFound = true;
+                                }
+                            }
+                            if (rollNoFound && clg.endTime > Date.now() && !clg.successfulCompletion) {
+                                // If for an already existing student, whose details already existed, its present college wants to update the details.
+                                overwriteExistingStudentsCollegeDetails(student);
+                            } else {
+                                // If an already existing student joins a new college, the details associated with that college are saved.
+                                insertCollegeRecordToStudent(student);
+                            }
+                        }
                     });
                 } else {
                     // 'student' has to be inserted into the DB for the first time
@@ -525,16 +542,6 @@ app.post('/collegeDataInsert', (req, res) => {
                 }
             }
         });
-        if (checkIfStudentObjectExists(student)) {
-            // 'student' already exists in the DB
-            if (checkIfCollegeRollNoAlreadyExistsForExistingStudent(student)) {
-                // If for an already existing student, whose details already existed, its present college wants to update the details.
-                overwriteExistingStudentsCollegeDetails();
-            } else {
-                // If an already existing student joins a new college, the details associated with that college are saved.
-                insertCollegeRecordToStudent(student);
-            }
-        }
     }
     res.redirect('/after_college_login');
 });
