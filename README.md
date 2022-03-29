@@ -6,7 +6,7 @@ The 3 documents as per the template are present [here](https://github.com/rohan8
 
 ## View Deployment
 
-The website deployment is visible <a href="https://aqueous-cliffs-29467.herokuapp.com/" target="_blank">here</a>.
+The website deployment is visible [here](https://aqueous-cliffs-29467.herokuapp.com/) (opens in the same tab. Use ctrl+click to open in new tab).
 
 ## Test the website
 
