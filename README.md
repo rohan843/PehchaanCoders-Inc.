@@ -20,3 +20,29 @@ Currently, the website is in its initial stages of development. In time, new scr
 
 ## The details of student data stored
 
+The schemas associated with a student are of the following form:
+
+```javascript
+const studentSchema = {
+    password: 'The password of the student, to be used for verification',
+    aadharNo: 'The Aadhar Id of the student, which is intended to be used as an identification, and also to be able to use this database along with the Aadhar database',
+    email: 'The mail id of the student, to be used for emails and prompts as needed'
+    colleges: [
+        "An array consisting of the relevant details of a student with regard to their college, for example, the degree pursued. We store this as a time based list. All colleges attended by a student will be visible here."
+    ],
+    trainings: [
+        "An array consisting of the details about various trainings recieved by a student."
+    ],
+    fellowships: [
+        "An array consisting of the info about the various fellowships recieved by a student."
+    ],
+    grants: [
+        "An array consisting of the info about the various grants recieved by a student."
+    ],
+    fellowshipAndGrant: [
+        "An array that associates those fellowships and grants that were recieved by the student together, i.e., as one component, using their respective id's"
+    ]
+};
+```
+
+Note: As it currently stands, only the college details part is being modified as stated in the points above. The remaining information about the trainings etc. will be modifiable by the student only, and that component is still under development right now.
