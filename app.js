@@ -160,7 +160,8 @@ function convertFormDataToObjectArray(formData) {
         collegeAICTEId: formData.collegeAICTEId,
         email: formData.email,
         startTime: formData.startTime,
-        endTime: formData.endTime
+        endTime: formData.endTime,
+        successfulCompletion: formData.successfulCompletion === 'on'
     }];
 }
 
@@ -511,27 +512,48 @@ app.post('/collegeDataInsert', (req, res) => {
     const validStudentRecords = validatedData.validRecords;
     const invalidStudentRecords = validatedData.invalidRecords;
     for (let student of validStudentRecords) {
-        Student.exists({ aadharNo: student.aaadharNo }, (err, stud) => {
+    Student.countDocuments({ aadharNo: student.aadharNo }, (err, count) => {
             if (err) {
-                console.log("Error occurred while searching student");
+                console.log("Error occurred while searching student", err);
             } else {
-                if (stud) {
-                    Student.findOne({ aaadharNo: student.aaadharNo }, (err, stud) => {
+                if (count > 0) {
+                    Student.findOne({ aadharNo: student.aadharNo }, (err, stud) => {
                         if (err) {
                             console.log(err);
                         } else {
                             let rollNoFound = false;
                             for (let clg of stud.colleges) {
-                                if (clg.rollNo == student.rollNo) {
+                                if (clg.rollNo == student.rollNo/* && clg.endTime > Date.now() && !clg.successfulCompletion*/) {
                                     rollNoFound = true;
                                 }
                             }
-                            if (rollNoFound && clg.endTime > Date.now() && !clg.successfulCompletion) {
+                            if (rollNoFound) {
                                 // If for an already existing student, whose details already existed, its present college wants to update the details.
-                                overwriteExistingStudentsCollegeDetails(student);
+                                for (let clg of stud.colleges) {
+                                    if (clg.rollNo == student.rollNo/* && clg.endTime > Date.now() && !clg.successfulCompletion*/) {
+                                        clg.degreeType = student.degreeType;
+                                        clg.degreeSpecialization = student.degreeSpecialization;
+                                        clg.collegeAICTEId = student.collegeAICTEId;
+                                        clg.successfulCompletion = student.successfulCompletion;
+                                        clg.startTime = student.startTime;
+                                        clg.endTime = student.endTime;
+                                        break;
+                                    }
+                                }
+                                stud.save();
                             } else {
                                 // If an already existing student joins a new college, the details associated with that college are saved.
-                                insertCollegeRecordToStudent(student);
+                                const collegeDetails = new CollegeDetail({
+                                    rollNo: student.rollNo,
+                                    degreeType: student.degreeType,
+                                    collegeAICTEId: student.collegeAICTEId,
+                                    degreeSpecialization: student.degreeSpecialization,
+                                    successfulCompletion: false,
+                                    startTime: student.startTime,
+                                    endTime: student.endTime
+                                });
+                                stud.colleges.push(collegeDetails);
+                                stud.save();
                             }
                         }
                     });
