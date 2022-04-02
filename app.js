@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const parser = require('body-parser');
 const mongoose = require('mongoose');
@@ -194,7 +195,7 @@ function _validateGrantAmount(amt) {
     var re = /^[-+]?[0-9]+\.[0-9][0-9]+$/;
     var found = str.match(re);
     if (found == str) {
-        document.getElementById("").innerHTML = result;
+        document.getElementById('').innerHTML = result;
     }
 }
 
@@ -248,7 +249,7 @@ function _validateStudentObject(student) {
             }
         }
         else {
-            alert("Invalid date format!");
+            alert('Invalid date format!');
             document.form1.text1.focus();
             return false;
         }
@@ -299,7 +300,7 @@ function _validateStudentObject(student) {
             }
         }
         else {
-            alert("Invalid date format!");
+            alert('Invalid date format!');
             document.form1.text1.focus();
             return false;
         }
@@ -308,13 +309,13 @@ function _validateStudentObject(student) {
     //Aadhaar Format
     function validateAadhaar() {
         var regexp = /^[2-9]{1}[0-9]{3}\s[0-9]{4}\s[0-9]{4}$/;
-        //var ano = document.getElementById("").value;
+        //var ano = document.getElementById('').value;
         var ano = student.aadharNo;
         if (regexp.test(ano)) {
-            console.log("Valid Aadhaar Number");
+            console.log('Valid Aadhaar Number');
             return true;
         } else {
-            console.log("Invalid Aadhaar Number");
+            console.log('Invalid Aadhaar Number');
             return false;
         }
     }
@@ -324,7 +325,7 @@ function _validateStudentObject(student) {
 function overwriteExistingStudentsCollegeDetails(student) {
     Student.findOne({ aadharNo: student.aadharNo }, (err, stud) => {
         if (err) {
-            console.log("Some error occurred while overwriting existing student's college details:", err);
+            console.log('Some error occurred while overwriting existing student's college details:', err);
         } else {
             for (let clg of stud.colleges) {
                 if (clg.rollNo == student.rollNo && clg.endTime > Date.now() && !clg.successfulCompletion) {
@@ -352,7 +353,7 @@ function insertCollegeRecordToStudent(student) {
     Student.findOne({ aadharNo: student.aadharNo }, (err, stud) => {
         if (err) {
             // TODO: Decide what to do if error occurrs
-            console.log("Some error occurred while inserting new college:", err);
+            console.log('Some error occurred while inserting new college:', err);
         } else {
             const collegeDetails = new CollegeDetail({
                 rollNo: student.rollNo,
@@ -434,12 +435,12 @@ function sendNewPasswordTo(aadharNo) {
       body: OTP
     });*/
     /* Basic Auth */
-    /*lib.Configuration.basicAuthUserName = "YOUR_BASIC_API_KEY";
-    lib.Configuration.basicAuthPassword = "YOUR_BASIC_SECRET_KEY";*/
+    /*lib.Configuration.basicAuthUserName = 'YOUR_BASIC_API_KEY';
+    lib.Configuration.basicAuthPassword = 'YOUR_BASIC_SECRET_KEY';*/
 
     /* HMAC
-        lib.Configuration.hmacAuthUserName = "YOUR_HMAC_API_KEY";
-        lib.Configuration.hmacAuthPassword = "YOUR_HMAC_SECRET_KEY";
+        lib.Configuration.hmacAuthUserName = 'YOUR_HMAC_API_KEY';
+        lib.Configuration.hmacAuthPassword = 'YOUR_HMAC_SECRET_KEY';
     */
 
     /*var controller = lib.MessagesController;
@@ -465,10 +466,10 @@ function sendNewPasswordTo(aadharNo) {
 const app = express();
 app.set('view engine', 'ejs');
 app.use(parser.urlencoded({ extended: true }));
-app.use("*/css", express.static("public/css"));
-app.use("*/img", express.static("public/img"));
-app.use("*/videos", express.static("public/videos"));
-app.use("*/js", express.static("public/js"));
+app.use('*/css', express.static('public/css'));
+app.use('*/img', express.static('public/img'));
+app.use('*/videos', express.static('public/videos'));
+app.use('*/js', express.static('public/js'));
 
 // Create responses to get, post etc here.
 
@@ -514,7 +515,7 @@ app.post('/collegeDataInsert', (req, res) => {
     for (let student of validStudentRecords) {
     Student.countDocuments({ aadharNo: student.aadharNo }, (err, count) => {
             if (err) {
-                console.log("Error occurred while searching student", err);
+                console.log('Error occurred while searching student', err);
             } else {
                 if (count > 0) {
                     Student.findOne({ aadharNo: student.aadharNo }, (err, stud) => {
@@ -583,15 +584,15 @@ app.post('/college_login_information', (req, res) => {
     if (/*credentials are correct*/ true) {
         res.redirect('/after_college_login');
     } else {
-        res.send("failure page");
+        res.send('failure page');
     }
 });
 
 let port = process.env.PORT;
-if (port == null || port == "") {
+if (port == null || port == '') {
   port = 3000;
 }
 
 app.listen(port, () => {
-    console.log("Server set up to listen on port", port, '.');
+    console.log('Server set up to listen on port', port, '.');
 });
