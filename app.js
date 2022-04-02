@@ -473,32 +473,32 @@ app.use("*/js", express.static("public/js"));
 // Create responses to get, post etc here.
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/frontend/index.html');
+    res.sendFile(__dirname + '/views/index.html');
 });
 
 app.get('/student_login', (req, res) => {
-    res.sendFile(__dirname + '/frontend/student_login.html');
+    res.sendFile(__dirname + '/views/student_login.html');
 });
 app.get('/college_login', (req, res) => {
-    res.sendFile(__dirname + '/frontend/college_login.html');
+    res.sendFile(__dirname + '/views/college_login.html');
 });
 app.get('/aicte_login', (req, res) => {
-    res.sendFile(__dirname + '/frontend/aicte_login.html');
+    res.sendFile(__dirname + '/views/aicte_login.html');
 });
 app.get('/own_student_details', (req, res) => {
-    res.sendFile(__dirname + '/frontend/own_student_details_display.html');
+    res.sendFile(__dirname + '/views/own_student_details_display.html');
 });
 app.get('/insert_new_student_details', (req, res) => {
-    res.sendFile(__dirname + '/frontend/insert_new_student_details.html');
+    res.sendFile(__dirname + '/views/insert_new_student_details.html');
 });
 app.get('/uploading_csv_files', (req, res) => {
-    res.sendFile(__dirname + '/frontend/uploading_csv_files.html');
+    res.sendFile(__dirname + '/views/uploading_csv_files.html');
 });
 app.get('/view_student_details', (req, res) => {
-    res.sendFile(__dirname + '/frontend/view_student_details.html');
+    res.sendFile(__dirname + '/views/view_student_details.html');
 });
 app.get('/after_college_login', (req, res) => {
-    res.sendFile(__dirname + '/frontend/after_college_login.html');
+    res.sendFile(__dirname + '/views/after_college_login.html');
 });
 
 app.post('/collegeDataInsert', (req, res) => {
