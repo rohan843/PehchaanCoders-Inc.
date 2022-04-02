@@ -4,13 +4,38 @@ const parser = require('body-parser');
 const mongoose = require('mongoose');
 const otpGenerator = require('otp-generator');
 const request = require('request');
+const session = require('express-session');
+const passport = require('passport');
+const passportLocalMongoose = require('passport-local-mongoose');
 
-// Validation
+const app = express();
+app.set('view engine', 'ejs');
+app.use(parser.urlencoded({ extended: true }));
+app.use("*/css", express.static("public/css"));
+app.use("*/img", express.static("public/img"));
+app.use("*/videos", express.static("public/videos"));
+app.use("*/js", express.static("public/js"));
 
-// at least one uppercase letter, one lowercase letter, one number and one special character
-const passwordValidationRegex = /^(?=.[A-Za-z])(?=.\d)(?=.[@$!%#?&])[A-Za-z\d@$!%*#?&]$/;
+/* // Authentication part -------------------------------------------------------------------------------------------
+app.use(session({
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+// create a user schema
+userSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password'] });
+userSchema.plugin(passportLocalMongoose);
+const User = mongoose.model('User', userSchema);
 
-// Mongoose stuff
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+*/
+
+// Mongoose part -------------------------------------------------------------------------------------------
 
 mongoose.connect('mongodb+srv://admin-rohan:test123@cluster0.g0nhe.mongodb.net/StudentData');
 
@@ -463,15 +488,12 @@ function sendNewPasswordTo(aadharNo) {
     });*/
 }
 
-const app = express();
-app.set('view engine', 'ejs');
-app.use(parser.urlencoded({ extended: true }));
-app.use("*/css", express.static("public/css"));
-app.use("*/img", express.static("public/img"));
-app.use("*/videos", express.static("public/videos"));
-app.use("*/js", express.static("public/js"));
+// Validation part -------------------------------------------------------------------------------------------
 
-// Create responses to get, post etc here.
+// at least one uppercase letter, one lowercase letter, one number and one special character
+const passwordValidationRegex = /^(?=.[A-Za-z])(?=.\d)(?=.[@$!%#?&])[A-Za-z\d@$!%*#?&]$/;
+
+// Create responses to get, post etc here. -------------------------------------------------------------------------------------------
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/index.html');
@@ -513,7 +535,7 @@ app.post('/collegeDataInsert', (req, res) => {
     const validStudentRecords = validatedData.validRecords;
     const invalidStudentRecords = validatedData.invalidRecords;
     for (let student of validStudentRecords) {
-    Student.countDocuments({ aadharNo: student.aadharNo }, (err, count) => {
+        Student.countDocuments({ aadharNo: student.aadharNo }, (err, count) => {
             if (err) {
                 console.log("Error occurred while searching student", err);
             } else {
@@ -588,9 +610,11 @@ app.post('/college_login_information', (req, res) => {
     }
 });
 
+// Server setup part ------------------------------------------------------------------------------------------
+
 let port = process.env.PORT;
 if (port == null || port == "") {
-  port = 3000;
+    port = 3000;
 }
 
 app.listen(port, () => {
